@@ -211,7 +211,7 @@ do i=3,nx-3
    cbi6(i)=alcaix6 
 enddo
 
-ailcaix6=0.49!3./10. 
+ailcaix6=3./10. 
 aicix6=1./128.*(75.+70.*ailcaix6)
 bicix6=1./256.*(126.*ailcaix6-25.)
 cicix6=1./256.*(-10.*ailcaix6+3.)
@@ -308,7 +308,7 @@ do j=3,ny-3
    cci6y(j)=1. 
    cbi6y(j)=alcaiy6 
 enddo
-ailcaiy6=0.49!3./10.
+ailcaiy6=3./10.
 aiciy6=1./128.*(75.+70.*ailcaiy6)
 biciy6=1./256.*(126.*ailcaiy6-25.)
 ciciy6=1./256.*(-10.*ailcaiy6+3.)
@@ -406,7 +406,7 @@ enddo
       cci6z(k)=1. 
       cbi6z(k)=alcaiz6 
    enddo
-   ailcaiz6=0.49!3./10.
+   ailcaiz6=3./10.
    aiciz6=1./128.*(75.+70.*ailcaiz6)
    biciz6=1./256.*(126.*ailcaiz6-25.)
    ciciz6=1./256.*(-10.*ailcaiz6+3.)

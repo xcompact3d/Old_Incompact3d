@@ -91,25 +91,24 @@ contains
     
 
 !X PENCILS
-!    call alloc_x0(ux1);call alloc_x0(uy1);call alloc_x0(uz1)
-    allocate (ux1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
-    allocate (uy1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
+    call alloc_x(ux1, opt_global=.true.)
+    call alloc_x(uy1, opt_global=.true.)
 #ifndef TWOD
-    allocate (uz1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
-    allocate (pz1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
+    call alloc_x(uz1, opt_global=.true.)
+    call alloc_x(pz1, opt_global=.true.)
 #else
     allocate (uz1(1,1,1))
     allocate (pz1(1,1,1))
 #endif
-    allocate (px1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
-    allocate (py1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
-    allocate (phi1(xstart(1):xend(1),xstart(2):xend(2),xstart(3):xend(3)))
-    call alloc_x0(gx1);call alloc_x0(gy1);call alloc_x0(gz1);call alloc_x0(phis1) 
-    call alloc_x0(hx1);call alloc_x0(hy1);call alloc_x0(hz1);call alloc_x0(phiss1)
-    call alloc_x0(ta1);call alloc_x0(tb1);call alloc_x0(tc1)
-    call alloc_x0(td1);call alloc_x0(te1);call alloc_x0(tf1)
-    call alloc_x0(tg1);call alloc_x0(th1);call alloc_x0(ti1)
-    call alloc_x0(di1);call alloc_x0(ep1)
+    call alloc_x(px1, opt_global=.true.)
+    call alloc_x(py1, opt_global=.true.)
+    call alloc_x(phi1, opt_global=.true.)
+    call alloc_x(gx1);call alloc_x(gy1);call alloc_x(gz1);call alloc_x(phis1) 
+    call alloc_x(hx1);call alloc_x(hy1);call alloc_x(hz1);call alloc_x(phiss1)
+    call alloc_x(ta1);call alloc_x(tb1);call alloc_x(tc1)
+    call alloc_x(td1);call alloc_x(te1);call alloc_x(tf1)
+    call alloc_x(tg1);call alloc_x(th1);call alloc_x(ti1)
+    call alloc_x(di1);call alloc_x(ep1)
     allocate(sx(xsize(2),xsize(3)),vx(xsize(2),xsize(3)))
     !inflow/ouflow 2d arrays
     allocate(bxx1(xsize(2),xsize(3)),bxy1(xsize(2),xsize(3)))
@@ -154,119 +153,31 @@ contains
     allocate (uvisu(xstV(1):xenV(1),xstV(2):xenV(2),xstV(3):xenV(3)))
 
 !Y PENCILS
-    call alloc_y0(ux2);call alloc_y0(uy2);call alloc_y0(uz2)
-    call alloc_y0(ta2);call alloc_y0(tb2);call alloc_y0(tc2)
-    call alloc_y0(td2);call alloc_y0(te2);call alloc_y0(tf2)
-    call alloc_y0(tg2);call alloc_y0(th2);call alloc_y0(ti2)
-    call alloc_y0(tj2)
-    call alloc_y0(di2);call alloc_y0(phi2)
+    call alloc_y(ux2);call alloc_y(uy2);call alloc_y(uz2)
+    call alloc_y(ta2);call alloc_y(tb2);call alloc_y(tc2)
+    call alloc_y(td2);call alloc_y(te2);call alloc_y(tf2)
+    call alloc_y(tg2);call alloc_y(th2);call alloc_y(ti2)
+    call alloc_y(tj2)
+    call alloc_y(di2);call alloc_y(phi2)
     allocate(sy(ysize(1),ysize(3)),vy(ysize(1),ysize(3)))
 !Z PENCILS
-    call alloc_z0(ux3);call alloc_z0(uy3);call alloc_z0(uz3)
-    call alloc_z0(ta3);call alloc_z0(tb3);call alloc_z0(tc3)
-    call alloc_z0(td3);call alloc_z0(te3);call alloc_z0(tf3)
-    call alloc_z0(tg3);call alloc_z0(th3);call alloc_z0(ti3)
-    call alloc_z0(di3);call alloc_z0(phi3)
+    call alloc_z(ux3);call alloc_z(uy3);call alloc_z(uz3)
+    call alloc_z(ta3);call alloc_z(tb3);call alloc_z(tc3)
+    call alloc_z(td3);call alloc_z(te3);call alloc_z(tf3)
+    call alloc_z(tg3);call alloc_z(th3);call alloc_z(ti3)
+    call alloc_z(di3);call alloc_z(phi3)
     allocate(sz(zsize(1),zsize(2)),vz(zsize(1),zsize(2)))
 
  ! if all periodic
-!    allocate (pp3(zstart(1):zend(1),zstart(2):zend(2),zstart(3):zend(3)))
-!    allocate (dv3(zstart(1):zend(1),zstart(2):zend(2),zstart(3):zend(3)))
-!    allocate (po3(zstart(1):zend(1),zstart(2):zend(2),zstart(3):zend(3)))
-    allocate (pp3(ph%zst(1):ph%zen(1),ph%zst(2):ph%zen(2),ph%zst(3):ph%zen(3)))
-    allocate (dv3(ph%zst(1):ph%zen(1),ph%zst(2):ph%zen(2),ph%zst(3):ph%zen(3)))
-    allocate (po3(ph%zst(1):ph%zen(1),ph%zst(2):ph%zen(2),ph%zst(3):ph%zen(3)))
-
+ !   allocate (pp3(ph%zst(1):ph%zen(1),ph%zst(2):ph%zen(2),ph%zst(3):ph%zen(3)))
+ !   allocate (dv3(ph%zst(1):ph%zen(1),ph%zst(2):ph%zen(2),ph%zst(3):ph%zen(3)))
+ !   allocate (po3(ph%zst(1):ph%zen(1),ph%zst(2):ph%zen(2),ph%zst(3):ph%zen(3)))
+    call alloc_z(pp3,ph,.true.)
+    call alloc_z(dv3,ph,.true.)
+    call alloc_z(po3,ph,.true.)
 
     return
   end subroutine init_variables
-
-  
-  ! a set of allocation routines to allocate arrays defined above
-  
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! Memory allocation routines to define variables using 2D decomposition
-  !    alloc_x? -- define x-pensil variable
-  !    alloc_y? -- define y-pensil variable
-  !    alloc_z? -- define z-pensil variable
-  ! The dimension all local in memory may have additional boundary points.
-  !  for example:
-  !    alloc_x0 -- size of x dimension is nx
-  !    alloc_x1 -- size of x dimension is nx+1
-  !    alloc_x2 -- size of x dimension is nx+2
-  !    alloc_xm -- size of x dimension is nx-1
-  ! The code uses 10 combinations - x0,x1,x2,y0,y1,z0,z1,xm,ym,zm
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine alloc_x0(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(xsize(1), xsize(2), xsize(3)))
-    return
-  end subroutine alloc_x0
-
-  subroutine alloc_x1(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(xsize(1)+1, xsize(2), xsize(3)))
-    return
-  end subroutine alloc_x1
-
-  subroutine alloc_x2(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(xsize(1)+2, xsize(2), xsize(3)))
-    return
-  end subroutine alloc_x2
-
-  subroutine alloc_xm(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(xsize(1)-1, xsize(2), xsize(3)))
-    return
-  end subroutine alloc_xm
-
-  subroutine alloc_y0(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(ysize(1), ysize(2), ysize(3)))
-    return
-  end subroutine alloc_y0
-
-  subroutine alloc_y1(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(ysize(1), ysize(2)+1, ysize(3)))
-    return
-  end subroutine alloc_y1
-
-  subroutine alloc_ym(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(ysize(1), ysize(2)-1, ysize(3)))
-    return
-  end subroutine alloc_ym
-
-  subroutine alloc_z0(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(zsize(1), zsize(2), zsize(3)))
-    return
-  end subroutine alloc_z0
-
-  subroutine alloc_z1(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(zsize(1), zsize(2), zsize(3)+1))
-    return
-  end subroutine alloc_z1
-
-  subroutine alloc_zm(var)
-    implicit none
-    real(mytype), allocatable, dimension(:,:,:) :: var
-    allocate(var(zsize(1), zsize(2), zsize(3)-1))
-    return
-  end subroutine alloc_zm
 
 end module var
 

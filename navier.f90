@@ -471,10 +471,16 @@ real(mytype),dimension(xsize(1),xsize(2),xsize(3)) :: gx1,gy1,gz1,phis1
 real(mytype),dimension(xsize(1),xsize(2),xsize(3)) :: hx1,hy1,hz1,phiss1
 
 real(mytype) :: y,r,um,r1,r2,r3
-integer :: k,j,i,fh,ierror
+integer :: k,j,i,fh,ierror,code,ii
 integer (kind=MPI_OFFSET_KIND) :: disp
 
 if (iin.eq.1) then !generation of a random noise
+
+
+   call system_clock(count=code)
+   call random_seed(size = ii)
+   call random_seed(put = code+63946*nrank*(/ (i - 1, i = 1, ii) /)) !
+
 
    call random_number(ux1)
    call random_number(uy1)
@@ -701,7 +707,9 @@ USE variables
 implicit none
 
 TYPE(DECOMP_INFO) :: ph2,ph3
-integer :: i,j,k,ijk,nxmsize,nymsize,nzmsize
+integer :: i,j,k,ijk,nxmsize,nymsize,nzmsize,code
+integer, dimension(2) :: dims, dummy_coords
+logical, dimension(2) :: dummy_periods
 
 real(mytype),dimension(ph3%zst(1):ph3%zen(1),ph3%zst(2):ph3%zen(2),nzmsize) :: pp3 
 !Z PENCILS NXM NYM NZM-->NXM NYM NZ
@@ -776,22 +784,45 @@ if (xend(3)==nz) then
    enddo
 endif
 
-if (xstart(2)==1) then
-   do k=1,xsize(3)
-   do i=1,xsize(1)
+
+   ! determine the processor grid in use
+   call MPI_CART_GET(DECOMP_2D_COMM_CART_X, 2, &
+         dims, dummy_periods, dummy_coords, code)
+
+   if (dims(1)==1) then
+      do k=1,xsize(3)
+      do i=1,xsize(1)
       dpdxy1(i,k)=ta1(i,1,k)/gdt(itr)
       dpdzy1(i,k)=tc1(i,1,k)/gdt(itr)
-   enddo
-   enddo
-endif
-if (xend(2)==ny) then
-   do k=1,xsize(3)
-   do i=1,xsize(1)
-      dpdxyn(i,k)=ta1(i,ny,k)/gdt(itr)
-      dpdzyn(i,k)=tc1(i,ny,k)/gdt(itr)
-   enddo
-   enddo
-endif
+      enddo
+      enddo
+      do k=1,xsize(3)
+      do i=1,xsize(1)
+      dpdxyn(i,k)=ta1(i,xsize(2),k)/gdt(itr)
+      dpdzyn(i,k)=tc1(i,xsize(2),k)/gdt(itr)
+      enddo
+      enddo
+   else
+!find j=1 and j=ny
+      if (xstart(2)==1) then
+         do k=1,xsize(3)
+         do i=1,xsize(1)
+      dpdxy1(i,k)=ta1(i,1,k)/gdt(itr)
+      dpdzy1(i,k)=tc1(i,1,k)/gdt(itr)
+         enddo
+         enddo
+      endif
+!      print *,nrank,xstart(2),ny-(nym/p_row)
+       if (ny-(nym/dims(1))==xstart(2)) then
+         do k=1,xsize(3)
+         do i=1,xsize(1)
+      dpdxyn(i,k)=ta1(i,xsize(2),k)/gdt(itr)
+      dpdzyn(i,k)=tc1(i,xsize(2),k)/gdt(itr)
+         enddo
+         enddo
+      endif
+
+   endif
 
 return
 end subroutine gradp

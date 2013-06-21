@@ -5,7 +5,7 @@
 ! decomposition. It also implements a highly scalable distributed
 ! three-dimensional Fast Fourier Transform (FFT).
 !
-! Copyright (C) 2009-2011 Ning Li, the Numerical Algorithms Group (NAG)
+! Copyright (C) 2009-2012 Ning Li, the Numerical Algorithms Group (NAG)
 !
 !=======================================================================
 
@@ -159,6 +159,7 @@ module decomp_2d
        init_coarser_mesh_statS,fine_to_coarseS,&
        init_coarser_mesh_statV,fine_to_coarseV,&
        init_coarser_mesh_statP,fine_to_coarseP,&
+       alloc_x, alloc_y, alloc_z, &
        update_halo, decomp_2d_abort, &
        get_decomp_info
 
@@ -247,6 +248,21 @@ module decomp_2d
      module procedure update_halo_real
      module procedure update_halo_complex
   end interface update_halo
+
+  interface alloc_x
+     module procedure alloc_x_real
+     module procedure alloc_x_complex
+  end interface alloc_x
+
+  interface alloc_y
+     module procedure alloc_y_real
+     module procedure alloc_y_complex
+  end interface alloc_y
+
+  interface alloc_z
+     module procedure alloc_z_real
+     module procedure alloc_z_complex
+  end interface alloc_z
 
 contains
 
@@ -1315,6 +1331,54 @@ contains
     return
   end subroutine prepare_shared_buffer
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Use Ian Bush's FreeIPC to generate shared-memory information
+  !  - system independent solution
+  !  - replacing David Tanqueray's implementation in alloc_shm.c
+  !    (old C code renamed to get_smp_map2)
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine get_smp_map(comm, nnodes, my_node, ncores, my_core, maxcor)
+    
+    use FIPC_module
+    
+    implicit none
+    
+    integer, intent(IN) :: comm
+    integer, intent(OUT) :: nnodes, my_node, ncores, my_core, maxcor
+    
+    integer :: intra_comm, extra_comm
+    integer :: ierror
+    
+    call FIPC_init(comm, ierror)
+    
+    ! intra_comm: communicator for processes on this shared memory node
+    ! extra_comm: communicator for all rank 0 on each shared memory node
+    call FIPC_ctxt_intra_comm(FIPC_ctxt_world, intra_comm, ierror)
+    call FIPC_ctxt_extra_comm(FIPC_ctxt_world, extra_comm, ierror)
+    
+    call MPI_COMM_SIZE(intra_comm,  ncores, ierror)
+    call MPI_COMM_RANK(intra_comm, my_core, ierror)
+    
+    ! only rank 0 on each shared memory node member of extra_comm
+    ! for others extra_comm = MPI_COMM_NULL
+    if (extra_comm /= MPI_COMM_NULL) then
+       call MPI_COMM_SIZE(extra_comm,  nnodes, ierror)
+       call MPI_COMM_RANK(extra_comm, my_node, ierror)
+    end if
+    
+    ! other ranks share the same information as their leaders
+    call MPI_BCAST( nnodes, 1, MPI_INTEGER, 0, intra_comm, ierror)
+    call MPI_BCAST(my_node, 1, MPI_INTEGER, 0, intra_comm, ierror)
+    
+    ! maxcor
+    call MPI_ALLREDUCE(ncores, maxcor, 1, MPI_INTEGER, MPI_MAX, &
+         MPI_COMM_WORLD, ierror)
+    
+    call FIPC_finalize(ierror)
+    
+    return
+    
+  end subroutine get_smp_map
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1634,6 +1698,12 @@ contains
 
     return
   end subroutine decomp_2d_abort
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Utility routines to help allocate 3D arrays
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#include "alloc.f90"
     
   
 end module decomp_2d

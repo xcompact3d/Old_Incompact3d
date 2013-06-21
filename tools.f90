@@ -150,7 +150,10 @@ USE MPI
 implicit none
 
 TYPE(DECOMP_INFO) :: phG
-integer :: i,j,k,irestart,nzmsize,fh,ierror
+integer :: i,j,k,irestart,nzmsize,fh,ierror,code
+integer, dimension(2) :: dims, dummy_coords
+logical, dimension(2) :: dummy_periods
+
 real(mytype), dimension(xsize(1),xsize(2),xsize(3)) :: ux1,uy1,uz1,ep1
 real(mytype), dimension(xsize(1),xsize(2),xsize(3)) :: gx1,gy1,gz1
 real(mytype), dimension(xsize(1),xsize(2),xsize(3)) :: hx1,hy1,hz1
@@ -218,7 +221,7 @@ if (iscalar==0) then
          call decomp_2d_write_var(fh,disp,1,px1)
          call decomp_2d_write_var(fh,disp,1,py1)
          call decomp_2d_write_var(fh,disp,1,pz1)
-         call decomp_2d_write_var(fh,disp,1,pp3)
+         call decomp_2d_write_var(fh,disp,1,pp3,phG)
          call MPI_FILE_CLOSE(fh,ierror)
       else
          if (nrank==0) print *,'RESTART'
@@ -238,7 +241,7 @@ if (iscalar==0) then
          call decomp_2d_read_var(fh,disp,1,px1)
          call decomp_2d_read_var(fh,disp,1,py1)
          call decomp_2d_read_var(fh,disp,1,pz1)
-         call decomp_2d_read_var(fh,disp,1,pp3)
+         call decomp_2d_read_var(fh,disp,1,pp3,phG)
          call MPI_FILE_CLOSE(fh,ierror)
       endif 
    endif
@@ -260,7 +263,7 @@ if (nscheme.ne.4) then
          call decomp_2d_write_var(fh,disp,1,px1)
          call decomp_2d_write_var(fh,disp,1,py1)
          call decomp_2d_write_var(fh,disp,1,pz1)
-         call decomp_2d_write_var(fh,disp,1,pp3)
+         call decomp_2d_write_var(fh,disp,1,pp3,phG)
          call decomp_2d_write_var(fh,disp,1,phi1)
          call decomp_2d_write_var(fh,disp,1,phis1)
          call MPI_FILE_CLOSE(fh,ierror)
@@ -279,7 +282,7 @@ if (nscheme.ne.4) then
          call decomp_2d_read_var(fh,disp,1,px1)
          call decomp_2d_read_var(fh,disp,1,py1)
          call decomp_2d_read_var(fh,disp,1,pz1)
-         call decomp_2d_read_var(fh,disp,1,pp3)
+         call decomp_2d_read_var(fh,disp,1,pp3,phG)
          call decomp_2d_read_var(fh,disp,1,phi1)
          call decomp_2d_read_var(fh,disp,1,phis1)
          call MPI_FILE_CLOSE(fh,ierror)
@@ -304,7 +307,7 @@ if (nscheme.ne.4) then
          call decomp_2d_write_var(fh,disp,1,px1)
          call decomp_2d_write_var(fh,disp,1,py1)
          call decomp_2d_write_var(fh,disp,1,pz1)
-         call decomp_2d_write_var(fh,disp,1,pp3)
+         call decomp_2d_write_var(fh,disp,1,pp3,phG)
          call decomp_2d_write_var(fh,disp,1,phi1)
          call decomp_2d_write_var(fh,disp,1,phis1)
          call decomp_2d_write_var(fh,disp,1,phiss1)
@@ -327,7 +330,7 @@ if (nscheme.ne.4) then
          call decomp_2d_read_var(fh,disp,1,px1)
          call decomp_2d_read_var(fh,disp,1,py1)
          call decomp_2d_read_var(fh,disp,1,pz1)
-         call decomp_2d_read_var(fh,disp,1,pp3)
+         call decomp_2d_read_var(fh,disp,1,pp3,phG)
          call decomp_2d_read_var(fh,disp,1,phi1)
          call decomp_2d_read_var(fh,disp,1,phis1)
          call decomp_2d_read_var(fh,disp,1,phiss1)
@@ -370,22 +373,46 @@ if (irestart==0) then
       enddo
    endif
 
-   if (xsize(2)==1) then
+
+   ! determine the processor grid in use
+   call MPI_CART_GET(DECOMP_2D_COMM_CART_X, 2, &
+         dims, dummy_periods, dummy_coords, code)
+
+   if (dims(1)==1) then
       do k=1,xsize(3)
       do i=1,xsize(1)
+      dpdxy1(i,k)=px1(i,1,k)/xdt
+      dpdzy1(i,k)=pz1(i,1,k)/xdt
+      enddo
+      enddo
+      do k=1,xsize(3)
+      do i=1,xsize(1)
+      dpdxyn(i,k)=px1(i,xsize(2),k)/xdt
+      dpdzyn(i,k)=pz1(i,xsize(2),k)/xdt
+      enddo
+      enddo
+   else
+!find j=1 and j=ny
+      if (xstart(2)==1) then
+         do k=1,xsize(3)
+         do i=1,xsize(1)
          dpdxy1(i,k)=px1(i,1,k)/xdt
          dpdzy1(i,k)=pz1(i,1,k)/xdt
-      enddo
-      enddo
+         enddo
+         enddo
+      endif
+!      print *,nrank,xstart(2),ny-(nym/p_row)
+       if (ny-(nym/dims(1))==xstart(2)) then
+         do k=1,xsize(3)
+         do i=1,xsize(1)
+         dpdxyn(i,k)=px1(i,xsize(2),k)/xdt
+         dpdzyn(i,k)=pz1(i,xsize(2),k)/xdt
+         enddo
+         enddo
+      endif
+
    endif
-   if (xsize(2)==ny) then
-      do k=1,xsize(3)
-      do i=1,xsize(1)
-         dpdxyn(i,k)=px1(i,ny,k)/xdt
-         dpdzyn(i,k)=pz1(i,ny,k)/xdt
-      enddo
-      enddo
-   endif
+
    if (nrank==0) print *,'reconstruction pressure gradients done!'
 endif
 
