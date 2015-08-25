@@ -45,6 +45,12 @@ OPTFC = -O3 -funroll-loops -ftree-vectorize -fcray-pointer -cpp
 CC = mpicc
 CFLAGS = -O3
 
+# Intel
+FC = mpiifort
+OPTFC = -cpp -O3 -xHost -ipo -static
+CC = mpiicc
+CFLAGS = -cpp -O3 -xHost -ipo -static
+
 # Cray
 #FC = ftn
 #OPTFC = -e Fm
