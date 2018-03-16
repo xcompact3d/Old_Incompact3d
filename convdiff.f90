@@ -396,5 +396,4 @@ if (nscheme==4) then
    endif
 endif
 
-
- end subroutine scalar
+end subroutine scalar
