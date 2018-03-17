@@ -1,3 +1,9 @@
+<a name="logo"/>
+<div align="center">
+<a href="https://www.incompact3d.com" target="_blank">
+<img src="https://www.dropbox.com/s/v2v3kw4wrtbqhkw/I3D_logo.png?dl=0" alt="I3D_logo" width="210" height="142"></img>
+</a>
+</div>
 
 A efficient code to solve the incompressible Navier-Stokes equations on supercomputers
 
